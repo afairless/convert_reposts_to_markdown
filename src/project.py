@@ -36,13 +36,13 @@ def filter_sql_to_correct_table(txt01: list[str]) -> list[str]:
     return txt03
 
 
-def create_posts_dataframe(txt: list[str]) -> pd.DataFrame:
+def create_posts_dataframe(txt: list[str]) -> pl.DataFrame:
     """
     Recreate the '_5A5_posts' table from the SQL dump file as a DataFrame
     """
 
-    colnames_txt = txt[0].split('(')[1].split(')')[0].replace('`', '')
-    colnames = colnames_txt.split(',')
+    # colnames_txt = txt[0].split('(')[1].split(')')[0].replace('`', '')
+    # colnames = colnames_txt.split(',')
 
     rows01 = [e for e in txt if e[0] == '(' and 'insert into' not in e.lower()]
     rows02 = [e[:e.rfind(')')+1] for e in rows01]
@@ -51,9 +51,28 @@ def create_posts_dataframe(txt: list[str]) -> pd.DataFrame:
     for e in rows03:
         assert isinstance(e, tuple)
 
-    df = pd.DataFrame(rows03, columns=colnames)
+    schema = {
+        'ID': pl.Int64, 'post_author': pl.Int64, 'post_date': pl.Utf8, 
+        'post_date_gmt': pl.Utf8, 'post_content': pl.Utf8, 
+        'post_title': pl.Utf8, 'post_excerpt': pl.Utf8, 'post_status': pl.Utf8, 
+        'comment_status': pl.Utf8, 'ping_status': pl.Utf8, 
+        'post_password': pl.Utf8, 'post_name': pl.Utf8, 'to_ping': pl.Utf8, 
+        'pinged': pl.Utf8, 'post_modified': pl.Utf8, 
+        'post_modified_gmt': pl.Utf8, 'post_content_filtered': pl.Utf8, 
+        'post_parent': pl.Int64, 'guid': pl.Utf8, 'menu_order': pl.Int64, 
+        'post_type': pl.Utf8, 'post_mime_type': pl.Utf8, 
+        'comment_count': pl.Int64}
+    df = pl.DataFrame(rows03, schema=schema, orient='row')
 
-    return df
+    df2 = df.with_columns(
+        pl.col('post_date').str.to_datetime(
+            format='%Y-%m-%d %H:%M:%S', strict=False),
+        pl.col('post_date_gmt').str.to_datetime(
+            format='%Y-%m-%d %H:%M:%S', strict=False))
+    # df = pd.DataFrame(rows03, columns=colnames)
+    # df.columns = colnames
+
+    return df2
 
 
 def main():
@@ -73,11 +92,11 @@ def main():
     output_path = Path.cwd() / 'output'
     output_filename = 'posts.parquet'
     output_filepath = output_path / output_filename
-    df.to_parquet(output_filepath)
+    df.write_parquet(output_filepath)
 
     output_filename = 'posts.csv'
     output_filepath = output_path / output_filename
-    df.to_csv(output_filepath)
+    df.write_csv(output_filepath)
 
 
 if __name__ == '__main__':
