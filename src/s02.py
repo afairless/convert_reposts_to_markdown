@@ -77,11 +77,13 @@ def extract_url_from_string_dict_given_start_idx(
     txt = a_string[start_idx:]
     end_idx = txt.find('}')
     txt = txt[:end_idx+1]
+
     try:
         url_dict = literal_eval(txt)
     except:
         txt = txt.replace('true', '"true"')
         url_dict = literal_eval(txt)
+
     url = url_dict[dict_key]
 
     return url
@@ -117,7 +119,7 @@ def extract_url_from_string_dict(a_string) -> list[str]:
 
 
 def extract_urls_from_post_content(
-    post_content: pl.Series) -> list[str | list[str]]:
+    post_content: pl.Series) -> list[list[str]]:
     """
     Extracts URLs from a Series of post content, i.e., HTML from a webpage
     """
@@ -138,7 +140,7 @@ def extract_urls_from_post_content(
         soup_as = soup.find_all('a')
         urls = [a['href'] for a in soup_as]
         if len(urls) >= 1:
-            url = urls[0]
+            url = [urls[0]]
 
         # Extraction #2
         if not url:
@@ -147,7 +149,7 @@ def extract_urls_from_post_content(
             if len(soup_ps_urls) >= 1:
                 txt = soup_ps_urls[0]
                 txt = remove_ad_hoc_extraneous_text_from_url(txt)
-                url = txt
+                url = [txt]
 
         # Extraction #3
         if not url:
@@ -155,9 +157,9 @@ def extract_urls_from_post_content(
             if len(url_list) > 1:
                 url = url_list
             elif len(url_list) == 1 and url_list[0]:
-                url = url_list[0]
+                url = [url_list[0]]
             else:
-                url = ''
+                url = ['']
 
         if isinstance(url, str):
             url = remove_extraneous_text_from_youtube_url(url)
@@ -170,6 +172,7 @@ def extract_urls_from_post_content(
 def main():
 
     input_path = Path.cwd() / 'output'
+    output_path = input_path
     input_filename = 'posts.parquet'
     input_filepath = input_path / input_filename
     df = pl.read_parquet(input_filepath)
@@ -185,7 +188,7 @@ def main():
         pl.col('post_title').str.to_lowercase().str.starts_with('what i'))
 
     # 'post_type' column at index 20 no longer needed
-    col_idxs = [2, 4, 5, 7, 11, 18]
+    col_idxs = [2, 4, 5, 7, 11]
 
     # for the purpose of needing a single copy of each post, 'inherit' is 
     #   redundant
@@ -197,19 +200,23 @@ def main():
     post_urls = extract_urls_from_post_content(df3['post_content'])
     assert len(post_urls) == len(df3)
 
+    post_srs = pl.Series(post_urls).alias('post_urls')
+    df4 = df3[:, col_idxs].with_columns(post_srs)
 
-    df2[:, col_idxs]
-    df3[:, col_idxs]
-    df3['post_status'].value_counts()
-    df3['post_title'].n_unique()
-    df3['post_name'].n_unique()
-    df3['post_content'].n_unique()
-    df3['post_type'].value_counts()
+    output_filename = 'posts_what_i_read.parquet'
+    output_filepath = output_path / output_filename
+    df4.write_parquet(output_filepath)
 
+    # df2[:, col_idxs]
+    # df3[:, col_idxs]
+    # df3['post_status'].value_counts()
+    # df3['post_title'].n_unique()
+    # df3['post_name'].n_unique()
+    # df3['post_content'].n_unique()
+    # df3['post_type'].value_counts()
 
-
-    for e in post_urls:
-        print(e)
+    # for e in post_urls:
+    #     print(e)
 
 
     # post_status:  future has date when scheduled to be published
