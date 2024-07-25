@@ -60,11 +60,56 @@ def remove_ad_hoc_extraneous_text_from_url(a_string: str) -> str:
 
 
 def remove_extraneous_text_from_youtube_url(a_string: str) -> str:
+    """
+    Some YouTube URLs have extraneous text after the video ID; this function
+        removes that extraneous text
+    """
 
     if 'youtu' in a_string:
         a_string = a_string.split('?si')[0]
 
     return a_string
+
+
+def extract_url_from_string_dict_given_start_idx(
+    a_string: str, start_idx: int, dict_key: str='url') -> str:
+
+    txt = a_string[start_idx:]
+    end_idx = txt.find('}')
+    txt = txt[:end_idx+1]
+    url_dict = literal_eval(txt)
+    url = url_dict[dict_key]
+
+    return url
+
+
+def extract_url_from_string_dict(a_string) -> list[str]:
+    """
+    Extracts URL from a string with an embedded dictionary
+
+    Example string:
+        'This is {"url": "https://www.example.com"} a string'
+    Example dictionary:
+        {"url": "https://www.example.com"}
+    """
+
+    start_txt = '{"url":'
+    start_idx_1 = a_string.find(start_txt)
+    start_idx_2 = a_string.rfind(start_txt)
+
+    if start_idx_1 != -1:
+        if start_idx_1 == start_idx_2:
+            url = extract_url_from_string_dict_given_start_idx(
+                a_string, start_idx_1)
+            return [url]
+        else:
+            url_1 = extract_url_from_string_dict_given_start_idx(
+                a_string, start_idx_1)
+            url_2 = extract_url_from_string_dict_given_start_idx(
+                a_string, start_idx_2)
+            return [url_1, url_2]
+    else:
+        return ['']
 
 
 def main():
@@ -129,34 +174,25 @@ def main():
                 post_url.append(txt)
                 counter += 1
             else:
-                start_txt = '{"url":'
-                start_idx = content_txt.find(start_txt)
-                start_idx_2 = content_txt.rfind(start_txt)
-                if start_idx != start_idx_2:
-                    # break
-                    print('-------------------------')
-                    print(content_txt)
-                    print('-------------------------')
-                if start_idx == -1:
+                url_list = extract_url_from_string_dict(content_txt)
+                if len(url_list) > 1:
+                    post_url.append(url_list)
+                    counter += 1
+                elif len(url_list) == 1 and url_list[0]:
+                    post_url.append(url_list[0])
+                    counter += 1
+                else:
                     post_url.append('')
-                    # print('-------------------------')
-                    # print(soup)
-                    # print('\n')
-                    # print(url_regex)
-                    # print('\n')
-                    # print(soup_ps)
-                    # print('\n')
-                    # print(urls)
-                    # print('-------------------------')
-                    continue
+                    print('-------------------------')
+                    print(soup)
+                    print('\n')
+                    print(url_regex)
+                    print('\n')
+                    print(soup_ps)
+                    print('\n')
+                    print(urls)
+                    print('-------------------------')
 
-                txt = content_txt[start_idx:]
-                end_idx = txt.find('}')
-                txt = txt[:end_idx+1]
-                url_dict = literal_eval(txt)
-                url = url_dict['url']
-                post_url.append(url)
-                counter += 1
 
 
 
