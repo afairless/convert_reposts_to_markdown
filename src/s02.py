@@ -77,7 +77,11 @@ def extract_url_from_string_dict_given_start_idx(
     txt = a_string[start_idx:]
     end_idx = txt.find('}')
     txt = txt[:end_idx+1]
-    url_dict = literal_eval(txt)
+    try:
+        url_dict = literal_eval(txt)
+    except:
+        txt = txt.replace('true', '"true"')
+        url_dict = literal_eval(txt)
     url = url_dict[dict_key]
 
     return url
@@ -112,6 +116,57 @@ def extract_url_from_string_dict(a_string) -> list[str]:
         return ['']
 
 
+def extract_urls_from_post_content(
+    post_content: pl.Series) -> list[str | list[str]]:
+    """
+    Extracts URLs from a Series of post content, i.e., HTML from a webpage
+    """
+
+    extracted_urls = []
+
+    for content_txt in post_content:
+
+        soup = bs(content_txt, 'html.parser')
+
+        url = None
+
+        # 3 ways to extract URLs  
+        #   if earlier one(s) don't work, try next one
+        ##################################################
+
+        # Extraction #1
+        soup_as = soup.find_all('a')
+        urls = [a['href'] for a in soup_as]
+        if len(urls) >= 1:
+            url = urls[0]
+
+        # Extraction #2
+        if not url:
+            soup_ps = soup.find_all('p')
+            soup_ps_urls = [e.text for e in soup_ps if 'http' in e.text]
+            if len(soup_ps_urls) >= 1:
+                txt = soup_ps_urls[0]
+                txt = remove_ad_hoc_extraneous_text_from_url(txt)
+                url = txt
+
+        # Extraction #3
+        if not url:
+            url_list = extract_url_from_string_dict(content_txt)
+            if len(url_list) > 1:
+                url = url_list
+            elif len(url_list) == 1 and url_list[0]:
+                url = url_list[0]
+            else:
+                url = ''
+
+        if isinstance(url, str):
+            url = remove_extraneous_text_from_youtube_url(url)
+
+        extracted_urls.append(url)
+
+    return extracted_urls
+
+
 def main():
 
     input_path = Path.cwd() / 'output'
@@ -139,6 +194,10 @@ def main():
         ~pl.col('post_status').eq('inherit') &
         ~pl.col('post_status').str.contains('draft') )
 
+    post_urls = extract_urls_from_post_content(df3['post_content'])
+    assert len(post_urls) == len(df3)
+
+
     df2[:, col_idxs]
     df3[:, col_idxs]
     df3['post_status'].value_counts()
@@ -147,72 +206,15 @@ def main():
     df3['post_content'].n_unique()
     df3['post_type'].value_counts()
 
-    idx = range(0, len(df3), 200)
-    aa = [df3['post_content'][i] for i in idx]
-    aa = df3['post_content']
 
 
-    post_url = []
-    counter = 0
-    for content_txt in aa:
-        url_regex = find_urls_in_string(content_txt)
-
-        soup = bs(content_txt, 'html.parser')
-        soup_as = soup.find_all('a')
-        urls = [a['href'] for a in soup_as]
-        soup_ps = soup.find_all('p')
-
-        if len(urls) == 1:
-            post_url.append(urls[0])
-            counter += 1
-        else:
-            soup_ps_urls = [e.text for e in soup_ps if 'http' in e.text]
-            if len(soup_ps_urls) == 1:
-                txt = soup_ps_urls[0]
-                txt = remove_ad_hoc_extraneous_text_from_url(txt)
-                txt = remove_extraneous_text_from_youtube_url(txt)
-                post_url.append(txt)
-                counter += 1
-            else:
-                url_list = extract_url_from_string_dict(content_txt)
-                if len(url_list) > 1:
-                    post_url.append(url_list)
-                    counter += 1
-                elif len(url_list) == 1 and url_list[0]:
-                    post_url.append(url_list[0])
-                    counter += 1
-                else:
-                    post_url.append('')
-                    print('-------------------------')
-                    print(soup)
-                    print('\n')
-                    print(url_regex)
-                    print('\n')
-                    print(soup_ps)
-                    print('\n')
-                    print(urls)
-                    print('-------------------------')
-
-
-
-
-    for e in post_url:
+    for e in post_urls:
         print(e)
 
-    len(post_url)
-
-    soup_ps = soup.find_all('p')
-    'meow meow bark woof meow'.rfind('meow')
 
     # post_status:  future has date when scheduled to be published
     # post_status:  'publish' apparently same as 'future'
     # post_status:  inherit has date when scheduled
-
-    for e in soup:
-        print(type(e))
-        print(dir(e))
-        print(e)
-
 
 
 
