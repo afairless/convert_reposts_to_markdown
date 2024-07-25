@@ -203,9 +203,11 @@ def main():
     post_srs = pl.Series(post_urls).alias('post_urls')
     df4 = df3[:, col_idxs].with_columns(post_srs)
 
+    df5 = df4.sort('post_date')
+
     output_filename = 'posts_what_i_read.parquet'
     output_filepath = output_path / output_filename
-    df4.write_parquet(output_filepath)
+    df5.write_parquet(output_filepath)
 
     # df2[:, col_idxs]
     # df3[:, col_idxs]
