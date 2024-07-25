@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 
 import gzip
-import pandas as pd
 import polars as pl
 from pathlib import Path
 from ast import literal_eval
@@ -68,6 +67,10 @@ def create_posts_dataframe(txt: list[str]) -> pl.DataFrame:
         pl.col('post_date').str.to_datetime(
             format='%Y-%m-%d %H:%M:%S', strict=False),
         pl.col('post_date_gmt').str.to_datetime(
+            format='%Y-%m-%d %H:%M:%S', strict=False),
+        pl.col('post_modified').str.to_datetime(
+            format='%Y-%m-%d %H:%M:%S', strict=False),
+        pl.col('post_modified_gmt').str.to_datetime(
             format='%Y-%m-%d %H:%M:%S', strict=False))
     # df = pd.DataFrame(rows03, columns=colnames)
     # df.columns = colnames
