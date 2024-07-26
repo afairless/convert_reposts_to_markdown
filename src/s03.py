@@ -167,7 +167,7 @@ def main():
     input_filepath = input_path / input_filename
     posts_txt = read_text_file(input_filepath)
 
-    input_filename = 'posts_what_i_read.parquet'
+    input_filename = 's02_website_read_posts.parquet'
     input_filepath = output_path / input_filename
     df = pl.read_parquet(input_filepath)
 

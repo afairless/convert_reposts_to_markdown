@@ -93,11 +93,13 @@ def main():
     df = create_posts_dataframe(txt01)
 
     output_path = Path.cwd() / 'output'
-    output_filename = 'posts.parquet'
+    output_path.mkdir(exist_ok=True, parents=True)
+
+    output_filename = 's01_posts.parquet'
     output_filepath = output_path / output_filename
     df.write_parquet(output_filepath)
 
-    output_filename = 'posts.csv'
+    output_filename = 's01_posts.csv'
     output_filepath = output_path / output_filename
     df.write_csv(output_filepath)
 

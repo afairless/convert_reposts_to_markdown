@@ -173,7 +173,7 @@ def main():
 
     input_path = Path.cwd() / 'output'
     output_path = input_path
-    input_filename = 'posts.parquet'
+    input_filename = 's01_posts.parquet'
     input_filepath = input_path / input_filename
     df = pl.read_parquet(input_filepath)
 
@@ -205,7 +205,7 @@ def main():
 
     df5 = df4.sort('post_date')
 
-    output_filename = 'posts_what_i_read.parquet'
+    output_filename = 's02_website_read_posts.parquet'
     output_filepath = output_path / output_filename
     df5.write_parquet(output_filepath)
 

@@ -1,7 +1,6 @@
 
-/input/
-/output/
-/output02/
+/input
+/output*
 
 # https://github.com/github/gitignore/blob/main/Python.gitignore
 #################################################
