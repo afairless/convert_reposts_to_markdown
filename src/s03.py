@@ -175,6 +175,7 @@ def main():
     df3 = insert_missing_urls(df2)
     df4 = adjust_urls(df3)
 
+    df5 = df4.join(posts_df, on='url', how='inner')
 
 
 
