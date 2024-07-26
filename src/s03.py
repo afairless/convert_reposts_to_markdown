@@ -47,6 +47,33 @@ def read_text_file(
         return ['There was an error when trying to read text file']
 
 
+def convert_posts_text_file_to_dataframe(posts_txt: list[str]) -> pl.DataFrame:
+    """
+    Convert text file of posts into a DataFrame with a column of URLs and a
+        column of the text of each post represented as a list of strings
+    """
+
+    post_units = []
+    unit = []
+    for e in posts_txt:
+        if e.strip():
+            unit.append(e)
+        else:
+            if unit:
+                post_units.append(unit)
+            unit = []
+
+    post_urls = [e[0] for e in post_units]
+
+    assert len(post_units) == len(post_urls)
+
+    unit_srs = pl.Series(post_units).alias('unit')
+    url_srs = pl.Series(post_urls).alias('url')
+    posts_df = pl.DataFrame([url_srs, unit_srs])
+
+    return posts_df
+
+
 def insert_missing_urls(df: pl.DataFrame) -> pl.DataFrame:
     """
     Some URLs were mistakenly never included in the website post, so insert 
@@ -140,24 +167,8 @@ def main():
     input_filepath = output_path / input_filename
     df = pl.read_parquet(input_filepath)
 
-
-    post_units = []
-    unit = []
-    for e in posts_txt:
-        if e.strip():
-            unit.append(e)
-        else:
-            if unit:
-                post_units.append(unit)
-            unit = []
-
-    post_urls = [e[0] for e in post_units]
-
-    assert len(post_units) == len(post_urls)
-
-    unit_srs = pl.Series(post_units).alias('unit')
-    url_srs = pl.Series(post_urls).alias('url')
-    posts_df = pl.DataFrame([url_srs, unit_srs])
+    assert isinstance(posts_txt, list)
+    posts_df = convert_posts_text_file_to_dataframe(posts_txt)
     posts_df = remove_url_end_slash(posts_df)
 
     df2 = df.with_columns(pl.col('post_urls').list.get(0).alias('url'))
