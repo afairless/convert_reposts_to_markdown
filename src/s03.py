@@ -159,6 +159,10 @@ def remove_url_end_slash(
 
 
 def main():
+    """
+    Combine information about posts from Wordpress website with information
+        about those same posts from the original text file
+    """
 
     input_path = Path.cwd() / 'input'
     output_path = Path.cwd() / 'output'

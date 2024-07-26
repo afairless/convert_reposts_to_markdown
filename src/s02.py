@@ -170,6 +170,11 @@ def extract_urls_from_post_content(
 
 
 def main():
+    """
+    Filter posts from the WordPress website whose titles begin with "What I"
+        (as for "What I Read" and "What I Watch") and extract URLs to which 
+        those posts refer
+    """
 
     input_path = Path.cwd() / 'output'
     output_path = input_path

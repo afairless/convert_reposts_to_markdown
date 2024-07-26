@@ -79,6 +79,10 @@ def create_posts_dataframe(txt: list[str]) -> pl.DataFrame:
 
 
 def main():
+    """
+    Extract information about posts from Wordpress website SQL dump file and
+        save it to a dataframe
+    """
 
     input_path = Path.cwd() / 'input'
     input_filename = 'localhost.sql.gz'
