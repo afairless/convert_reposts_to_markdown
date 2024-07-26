@@ -140,16 +140,20 @@ def adjust_urls(df: pl.DataFrame) -> pl.DataFrame:
     return df4
 
 
-def remove_url_end_slash(df: pl.DataFrame) -> pl.DataFrame:
+def remove_url_end_slash(
+    df: pl.DataFrame, url_colname: str='url') -> pl.DataFrame:
+    """
+    Remove the trailing slash from the URLs in DataFrame column named 'url'
+    """
 
     # some URLs end in a slash and some don't, so remove them
-    slash_mask = df['url'].str.ends_with('/')
+    slash_mask = df[url_colname].str.ends_with('/')
     df2 = df.with_columns(
         pl.when(slash_mask)
         .then(
-            pl.col('url')
-            .str.slice(0, length=pl.col('url').str.len_chars()-1))
-        .otherwise(pl.col('url')))
+            pl.col(url_colname)
+            .str.slice(0, length=pl.col(url_colname).str.len_chars()-1))
+        .otherwise(pl.col(url_colname)))
 
     return df2
 
@@ -177,6 +181,9 @@ def main():
 
     df5 = df4.join(posts_df, on='url', how='inner')
 
+    output_filename = 's03_website_textfile_merged.parquet'
+    output_filepath = output_path / output_filename 
+    df5.write_parquet(output_filepath)
 
 
 if __name__ == '__main__':
