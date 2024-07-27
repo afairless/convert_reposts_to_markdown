@@ -12,6 +12,7 @@ linux = "5.4.0"
 step01 = { cmd = "python src/s01.py", inputs = ['input/localhost.sql.gz'], outputs = ['output/s01_posts.parquet']}
 step02 = { cmd = "python src/s02.py", depends-on = ["step01"], inputs = ['output/s01_posts.parquet'], outputs = ['output/s02_website_read_posts.parquet'] }
 step03 = { cmd = "python src/s03.py", depends-on = ["step02"], inputs = ['input/01posts.txt', 'output/s02_website_read_posts.parquet'], outputs = ['output/s03_website_textfile_merged.parquet'] }
+step04 = { cmd = "python src/s04.py", depends-on = ["step03"], inputs = ['output/s03_website_textfile_merged.parquet'], outputs = ['output/md_posts/*'] }
 
 [dependencies]
 pandas = ">=2.2.2,<2.3"
