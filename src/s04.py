@@ -90,11 +90,43 @@ def convert_post_to_markdown(post_info: dict[str, Any]) -> Post:
     return post
 
 
-def main():
+def write_list_to_text_file(
+    a_list: list[str], text_filename: Path | str, overwrite: bool=False):
     """
+    Writes a list of strings to a text file
+    If 'overwrite' is 'True', any existing file by the name of 'text_filename'
+        will be overwritten
+    If 'overwrite' is 'False', list of strings will be appended to any existing
+        file by the name of 'text_filename'
+
+    :param a_list: a list of strings to be written to a text file
+    :param text_filename: a string denoting the filepath or filename of text
+        file
+    :param overwrite: Boolean indicating whether to overwrite any existing text
+        file or to append 'a_list' to that file's contents
+    :return:
     """
 
-    input_path = Path.cwd() / 'input'
+    if overwrite:
+        append_or_overwrite = 'w'
+    else:
+        append_or_overwrite = 'a'
+
+    try:
+        text_file = open(text_filename, append_or_overwrite, encoding='utf-8')
+        for e in a_list:
+            text_file.write(str(e))
+            text_file.write('\n')
+
+    finally:
+        text_file.close()
+
+
+def main():
+    """
+    Convert the website post data to markdown files
+    """
+
     output_path = Path.cwd() / 'output'
     output_md_path = output_path / 'md_posts'
     output_md_path.mkdir(exist_ok=True, parents=True)
@@ -112,8 +144,8 @@ def main():
 
     for post in posts:
         output_filepath = output_md_path / post.filename
-        with open(output_filepath, 'w') as f:
-            f.write('\n'.join(post.content))
+        post.content = [e + '  ' for e in post.content]
+        write_list_to_text_file(post.content, output_filepath, True)
 
 
 if __name__ == '__main__':
