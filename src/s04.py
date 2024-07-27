@@ -138,8 +138,14 @@ def main():
         posts.append(post)
 
     for post in posts:
+
         output_filepath = output_md_path / post.filename
-        post.content = [e + '  ' for e in post.content]
+
+        # some markdown formats/readers display new lines when 2 spaces are at 
+        #   the end of a line, but those spaces disrupt Zola static site 
+        #   generator
+        post.content = [e + '  ' if '+++' not in e else e for e in post.content]
+
         write_list_to_text_file(post.content, output_filepath, True)
 
 
