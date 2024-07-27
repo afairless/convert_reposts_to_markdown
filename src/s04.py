@@ -104,7 +104,6 @@ def write_list_to_text_file(
         file
     :param overwrite: Boolean indicating whether to overwrite any existing text
         file or to append 'a_list' to that file's contents
-    :return:
     """
 
     if overwrite:
@@ -112,14 +111,10 @@ def write_list_to_text_file(
     else:
         append_or_overwrite = 'a'
 
-    try:
-        text_file = open(text_filename, append_or_overwrite, encoding='utf-8')
+    with open(text_filename, append_or_overwrite, encoding='utf-8') as txt_file:
         for e in a_list:
-            text_file.write(str(e))
-            text_file.write('\n')
-
-    finally:
-        text_file.close()
+            txt_file.write(str(e))
+            txt_file.write('\n')
 
 
 def main():
