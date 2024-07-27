@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-import string
+import re
 import polars as pl
 from typing import Any
 from pathlib import Path
@@ -13,6 +13,22 @@ class Post:
     filename: str
     content: list[str]
     tags: list[str]
+
+
+def remove_unwanted_characters(input_string):
+    """
+    Remove characters from string that are not alphanumeric or among the 
+        specified punctuation characters
+    """
+
+    # regex pattern to match characters that are not alphanumeric or among the 
+    #   specified punctuation characters
+    pattern = r'[^a-zA-Z0-9_\- ]'
+
+    # replace matched characters with an empty string
+    cleaned_string = re.sub(pattern, '', input_string)
+
+    return cleaned_string
 
 
 def convert_post_to_markdown(post_info: dict[str, Any]) -> Post:
@@ -28,11 +44,12 @@ def convert_post_to_markdown(post_info: dict[str, Any]) -> Post:
     # construct the markdown filename
     ##################################################
 
-    translator = str.maketrans('', '', string.punctuation)
+    # remove the title prefix "What I Read:" or "What I Watch:"
     title_1 = title.split(':')[1].strip().lower()
-    title_2 = title_1.translate(translator)
+    title_2 = remove_unwanted_characters(title_1)
     title_3 = title_2.split(' ')
-    title_4 = '_'.join(title_3[:3])
+    # put first 2 words of the title into the filename
+    title_4 = '_'.join(title_3[:2])
     filename = date + '_' + title_4 + '.md'
 
 
