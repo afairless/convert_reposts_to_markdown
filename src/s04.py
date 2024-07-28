@@ -58,7 +58,7 @@ def convert_post_to_markdown(post_info: dict[str, Any]) -> Post:
 
     md_post = []
     md_post.append('+++')
-    md_post.append("title = '{}'".format(title))
+    md_post.append("title = '{}'".format(title.replace("'", "")))
     md_post.append("date = '{}'".format(date))
     md_post.append('+++')
 
