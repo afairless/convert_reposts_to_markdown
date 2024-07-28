@@ -23,7 +23,8 @@ def remove_unwanted_characters(input_string):
 
     # regex pattern to match characters that are not alphanumeric or among the 
     #   specified punctuation characters
-    pattern = r'[^a-zA-Z0-9_\- ]'
+    # pattern = r'[^a-zA-Z0-9_\- ]'
+    pattern = r'[^a-zA-Z0-9_ ]'
 
     # replace matched characters with an empty string
     cleaned_string = re.sub(pattern, '', input_string)
@@ -38,7 +39,8 @@ def convert_post_to_markdown(post_info: dict[str, Any]) -> Post:
     """
 
     title = post_info['post_title']
-    date = post_info['post_date'].strftime('%Y-%m-%d')
+    date_sep = '-'
+    date = post_info['post_date'].strftime(f'%Y{date_sep}%m{date_sep}%d')
 
 
     # construct the markdown filename
@@ -50,7 +52,13 @@ def convert_post_to_markdown(post_info: dict[str, Any]) -> Post:
     title_3 = title_2.split(' ')
     # put first 2 words of the title into the filename
     title_4 = '_'.join(title_3[:2])
-    filename = date + '_' + title_4 + '.md'
+
+    # Zola static site generator creates slugs from filenames, and the slugs
+    #   must be unique
+    # Zola also ignores dates in the format 'YYYY-MM-DD' at the start of the 
+    #   filename, but the date is needed to ensure that the slugs are unique
+    # removing the hyphens from the date retains the date in the slugs
+    filename = date.replace(date_sep, '') + '_' + title_4 + '.md'
 
 
     # assemble the markdown content
