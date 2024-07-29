@@ -55,10 +55,21 @@ def convert_post_to_markdown(post_info: dict[str, Any]) -> Post:
 
     # Zola static site generator creates slugs from filenames, and the slugs
     #   must be unique
-    # Zola also ignores dates in the format 'YYYY-MM-DD' at the start of the 
+    # Zola ignores dates in the format 'YYYY-MM-DD' at the start of the 
     #   filename, but the date is needed to ensure that the slugs are unique
     # removing the hyphens from the date retains the date in the slugs
     filename = date.replace(date_sep, '') + '_' + title_4 + '.md'
+
+
+    # save the tags for the post
+    ##################################################
+
+    unit = post_info['unit']
+    tags_str = unit[-1]
+    tags = tags_str.split(',')
+    tags = [e.strip() for e in tags]
+    tags = [e for e in tags if e]
+    tags_str = str(tags)
 
 
     # assemble the markdown content
@@ -68,26 +79,18 @@ def convert_post_to_markdown(post_info: dict[str, Any]) -> Post:
     md_post.append('+++')
     md_post.append("title = '{}'".format(title.replace("'", "")))
     md_post.append("date = '{}'".format(date))
+    md_post.append('\n')
+    md_post.append('[taxonomies]')
+    md_post.append(f'tags = {tags_str}')
     md_post.append('+++')
-
     md_post.append('\n')
 
-    unit = post_info['unit']
     for i, e in enumerate(unit):
         if i < len(unit) - 1:
             if valid_url(e):
                 md_post.append(f'[{e}]({e})')
             else:
                 md_post.append(e)
-
-
-    # save the tags for the post
-    ##################################################
-
-    tags_str = unit[-1]
-    tags = tags_str.split(',')
-    tags = [e.strip() for e in tags]
-    tags = [e for e in tags if e]
 
 
     # final assembly
