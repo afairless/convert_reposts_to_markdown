@@ -53,12 +53,7 @@ def convert_post_to_markdown(post_info: dict[str, Any]) -> Post:
     # put first 2 words of the title into the filename
     title_4 = '_'.join(title_3[:2])
 
-    # Zola static site generator creates slugs from filenames, and the slugs
-    #   must be unique
-    # Zola ignores dates in the format 'YYYY-MM-DD' at the start of the 
-    #   filename, but the date is needed to ensure that the slugs are unique
-    # removing the hyphens from the date retains the date in the slugs
-    filename = date.replace(date_sep, '') + '_' + title_4 + '.md'
+    filename = date + '_' + title_4 + '.md'
 
 
     # save the tags for the post
