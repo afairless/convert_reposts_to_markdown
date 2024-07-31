@@ -82,6 +82,7 @@ def convert_post_to_markdown(post_info: dict[str, Any]) -> Post:
     md_post.append('\n')
     md_post.append('[taxonomies]')
     md_post.append(f'tags = {tags_str}')
+    md_post.append(f"categories = ['repost']")
     md_post.append('+++')
     md_post.append('\n')
 
