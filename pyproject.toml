@@ -1,7 +1,7 @@
 [project]
 name = "Convert Re-Posts from text/Wordpress to Markdown"
 version = "0.0.1"
-description = "Converts a text file and a SQL dump file from a Wordpress website to a series of markdown files for a static site generator (Zola)."
+description = "Converts a text file and a SQL dump file from a Wordpress website to a series of markdown files for a static site generator (Zola)"
 authors = [
   { name = "Andrew Fairless" },
 ]
